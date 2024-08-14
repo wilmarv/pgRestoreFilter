@@ -1,0 +1,21 @@
+{
+  "name": "RecuperaTabela",
+  "version": "1.0.0",
+  "description": "Gera arquivo txt com as tabelas requeridas para restaurar as tabela",
+  "main": "index.ts",
+  "author": "wilmarV",
+  "license": "MIT",
+  "scripts": {
+    "start": "ts-node index.ts",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^22.3.0",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "ts-node": "^10.9.2"
+  }
+}
