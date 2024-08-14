@@ -4,8 +4,8 @@ import * as path from 'path';
 async function main() {
 
     try {
-        const inputFilePath = path.resolve("tabelas.txt");
-        const outputFilePath = path.resolve("tabelasSelecionadas.txt");
+        const inputFilePath = path.resolve("contents.txt");
+        const outputFilePath = path.resolve("selectedSchema.txt");
 
         const fileContent = await fs.promises.readFile(inputFilePath, 'utf-8');
         const lines = fileContent.split('\n');
