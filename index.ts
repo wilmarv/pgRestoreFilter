@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 async function main() {
+
     try {
         const inputFilePath = path.resolve("tabelas.txt");
         const outputFilePath = path.resolve("tabelasSelecionadas.txt");
@@ -12,11 +13,17 @@ async function main() {
 
         for (let line of lines) {
             if (
-                !line.includes("sei") && 
-                !line.includes("cpe") && 
-                !line.includes("sat") &&
-                !line.includes("scc") &&
-                !line.includes("sca")
+                line.includes(" agro ") ||
+                line.includes(" bling ") ||
+                line.includes(" ctb ") ||
+                line.includes(" cpdv ") ||
+                line.includes(" kikker ") ||
+                line.includes(" fin ")||
+                line.includes(" imobilizado ")||
+                line.includes(" imp ")||
+                line.includes(" impl ")||
+                line.includes(" messaging ")||
+                line.includes(" sfl ")
             ) {
                 line = ";" + line;
             }
