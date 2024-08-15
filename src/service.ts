@@ -30,11 +30,13 @@ async function pgRestoreSchema(stackError: string[]) {
         restoreProcess.stderr.on('data', (data) => {
             console.error(`stderr: ${data}`);
             const message = data.toString();
+
+            if(message.includes('pg_restore: error') || message.includes('pg_restore: warning'))
+                stackError.push(message);
             if (message.includes('pg_restore: error') && !message.includes('could not execute query')) {
                 reject(new Error(message));
                 restoreProcess.kill();
             }
-            stackError.push(message);
         });
 
         restoreProcess.on('close', (code) => {
@@ -74,11 +76,13 @@ async function pgRestoreData(stackError: string[]): Promise<void> {
             restoreProcess.stderr.on('data', (data) => {
                 console.error(`stderr: ${data}`);
                 const message = data.toString();
+
+                if(message.includes('pg_restore: error') || message.includes('pg_restore: warning'))
+                    stackError.push(message);
                 if (message.includes('pg_restore: error') && !message.includes('could not execute query')) {
                     reject(new Error(message));
                     restoreProcess.kill();
                 }
-                stackError.push(message);
             });
 
             restoreProcess.on('close', (code) => {
@@ -111,11 +115,13 @@ async function pgRestoreData(stackError: string[]): Promise<void> {
             restoreProcess.stderr.on('data', (data) => {
                 console.error(`stderr: ${data}`);
                 const message = data.toString();
+
+                if(message.includes('pg_restore: error') || message.includes('pg_restore: warning'))
+                    stackError.push(message);
                 if (message.includes('pg_restore: error') && !message.includes('could not execute query')) {
                     reject(new Error(message));
                     restoreProcess.kill();
                 }
-                stackError.push(message);
             });
 
             restoreProcess.on('close', (code) => {
