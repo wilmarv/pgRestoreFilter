@@ -18,7 +18,7 @@ export const config: ConfigProps = {
     postPath: "./pgArchive/post_data.txt",
 
     nomeBanco: "compels_mr",
-    schemasList: ["cpdv", "crm", "dominio", "ecommerce", "kikker", "messaging", "otrs", "pci", "pcp", "rdstation", "rec", "transp", "tray", "vipcommerce"],
+    schemasList: ["cpdv", "crm", "dominio", "ecommerce", "kikker", "estoquekikker", "messaging", "otrs", "pci", "pcp", "rdstation", "rec", "transp", "tray", "vipcommerce"],
     codigoLoja: "mr",
     lojaList: ["mr01", "mr02", "mr04", "mr06", "mr18"],
 }
