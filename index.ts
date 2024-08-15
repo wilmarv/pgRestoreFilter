@@ -31,7 +31,7 @@ async function main() {
         await pgRestoreData(arrayError);
 
         if (arrayError.length > 0) {
-            console.log("============================================================================");
+            console.log("============================================================================ \n");
             console.log("Erros do processo: \n");
             arrayError.forEach(error => console.log(error + "\n"));
         }
