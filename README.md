@@ -1,6 +1,6 @@
 # Projeto de Restauração de Banco de Dados com PostgreSQL
 
-Este repositório contém scripts e configurações para restaurar um banco de dados PostgreSQL a partir de um arquivo de backup. A principal funcionalidade é permitir a exclusão de schemas específicos durante a restauração.
+Este repositório é um script para automatizar a restauração de um banco de dados PostgreSQL a partir de um arquivo .backup. A principal funcionalidade é restaurar schemas e tabelas específicas por meio de um filtro de exclusão.
 
 ## Pré-requisitos
 
@@ -22,22 +22,36 @@ ou
 npm install
 ```
 
-### 2. Gerar Arquivo de Conteúdo do Backup
+### 2. Editar Filtro
 
-Antes de executar o script principal, é necessário gerar um arquivo `.txt` contendo a lista de todos os objetos (tabelas, funções, etc.) presentes no backup. Isso pode ser feito com o comando `pg_restore`:
+Antes de executar o script para restaurar o banco de dados, descompacte o arquivo zipado e, em seguida, acesse o arquivo `index.ts`. Modifique os valores de acordo com a configuração da sua plataforma no objeto `config`:
 
 ```
-pg_restore -l -f contents.txt arquivo_backup.backup
+export const config = {
+    backupFilePath: "/home/compels/Downloads/compels_mr_2024-08-14_22_05.backup",
+    preDataPath: "./pgArchive/pre_data.txt",
+    dataPath: "./pgArchive/data.txt",
+    postPath: "./pgArchive/post_data.txt",
+
+    nomeBanco: "compels_mr",
+    schemasList: ["cpdv", "crm", "dominio", "ecommerce", "kikker", "messaging", "otrs", "pci", "pcp", "rdstation", "rec", "transp", "tray", "vipcommerce"],
+    codigoLoja: "mr",
+    lojaList: ["mr01", "mr02", "mr04", "mr06", "mr18"],
+}
+
 ```
 
-O arquivo `contents.txt` será gerado e deve ser colocado na raiz do projeto.
+Configurações:
 
-### 3.Editar o Arquivo 
+- backupFilePath: A localização do arquivo .backup.
+- preDataPath, dataPath, postPath: O local onde serão guardados os arquivos de script pg_restore (recomendado não alterar, a menos que OS exija).
+- nomeBanco: O nome do banco a ser restaurado.
+- schemasList: Lista de schemas ou apenas nomes de tabelas a serem excluídas da restauração.
+- codigoLoja: Parâmetro não obrigatório, mas útil caso o banco de dados seja particionado e você deseje restaurar uma loja específica.
+- lojaList: Parâmetro não obrigatório, Array de strings contendo o código e número da loja.
 
-Abra o arquivo `index.ts` e remova ou adicione os schemas com interesse de excluir da restauração.
-
-### 4. Executar o Script de Seleção de Schemas
-Após editar e salvar o arquivo `index.ts`, execute o seguinte comando para gerar o arquivo `selectedSchema.txt`, que contém a lista de objetos os schemas comentados:
+### 3. Executar o Script de Restauração BD
+Após editar e salvar o arquivo `index.ts`, execute o seguinte:
 
 ```
 yarn start
@@ -46,13 +60,3 @@ ou
 ```
 npm start
 ```
-
-### 5.Restaurar o Banco de Dados
-
-Com o arquivo `selectedSchema.txt` gerado, você pode prosseguir com a restauração do banco de dados usando o `pg_restore`:
-
-```
-pg_restore -U postgres -d <nome_banco> -L selectedSchema.txt -v <arquivo_backup.backup>
-```
-
-Substitua `<nome_banco>` pelo nome do banco de dados de destino e `<arquivo_backup.backup>` pelo nome do arquivo de backup.

@@ -1,46 +1,42 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import { pgRestoreData, pgRestoreSchema } from "./src/service";
+
+type ConfigProps = {
+    backupFilePath: string;
+    preDataPath: string;
+    dataPath: string;
+    postPath: string;
+    nomeBanco: string;
+    schemasList: string[];
+    codigoLoja: string | "";
+    lojaList: string[];
+}
+
+export const config: ConfigProps = {
+    backupFilePath: "/home/compels/Downloads/compels_mr_2024-08-14_22_05.backup",
+    preDataPath: "./pgArchive/pre_data.txt",
+    dataPath: "./pgArchive/data.txt",
+    postPath: "./pgArchive/post_data.txt",
+
+    nomeBanco: "compels_mr",
+    schemasList: ["cpdv", "crm", "dominio", "ecommerce", "kikker", "messaging", "otrs", "pci", "pcp", "rdstation", "rec", "transp", "tray", "vipcommerce"],
+    codigoLoja: "mr",
+    lojaList: ["mr01", "mr02", "mr04", "mr06", "mr18"],
+}
 
 async function main() {
-
     try {
-        const inputFilePath = path.resolve("contents.txt");
-        const outputFilePath = path.resolve("/home/compels/Downloads/selectedSchema.txt");
+        const arrayError: string[] = [];
 
-        const fileContent = await fs.promises.readFile(inputFilePath, 'utf-8');
-        const lines = fileContent.split('\n');
-        const modifiedLines: string[] = [];
+        await pgRestoreSchema(arrayError);
+        await pgRestoreData(arrayError);
 
-        const mrPattern = /_mr\d{2}/;
-        const excludedMr = ["_mr01", "_mr02", "_mr04", "_mr06", "_mr18"];
-
-        for (let line of lines) {
-            if (
-                line.includes(" agro ") ||
-                line.includes(" bling ") ||
-                line.includes(" ctb ") ||
-                line.includes(" cpdv ") ||
-                line.includes(" fin ") ||
-                line.includes(" imobilizado ") ||
-                line.includes(" imp ") ||
-                line.includes(" impl ") ||
-                line.includes(" messaging ") ||
-                line.includes(" lfi ") ||
-                line.includes(" tray ") ||
-                line.includes(" transp ") ||
-                line.includes(" sfl ") ||
-                line.includes("old") ||
-                line.includes("kikker") ||
-                (mrPattern.test(line) && !excludedMr.some(mr => line.includes(mr)))
-            ) {
-                line = ";" + line;
-            }
-            modifiedLines.push(line);
+        if (arrayError.length > 0) {
+            console.log("============================================================================");
+            console.log("Erros do processo: \n");
+            arrayError.forEach(error => console.log(error + "\n"));
         }
-        await fs.promises.writeFile(outputFilePath, modifiedLines.join('\n'), 'utf-8');
-        console.log("Acho que deu certo aquela parada que vc está tentando fazer, mas confere ai cara...");
     } catch (error) {
-        console.error("Ocorreu um erro:", error);
+        console.error("Deu ruim ai, verifica ai:", error);
     }
 }
 main();
