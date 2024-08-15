@@ -61,11 +61,14 @@ async function filterPgRestoreFile() {
     const codigoLoja = config.codigoLoja;
     const filterLojas = config.lojaList;
 
+    await generateDataFile();
+
     const pattern = new RegExp(`_${codigoLoja}\\d{2}`, 'i');
     const filePath = path.resolve(config.dataPath);
     const fileContent = await fs.promises.readFile(filePath, 'utf-8');
     const lines = fileContent.split('\n');
     const modifiedLines: string[] = [];
+
     for (let line of lines) {
 
         if (!line.startsWith(";")) {

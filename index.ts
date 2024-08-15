@@ -7,7 +7,7 @@ type ConfigProps = {
     postPath: string;
     nomeBanco: string;
     schemasList: string[];
-    codigoLoja: string | "";
+    codigoLoja: string | null;
     lojaList: string[];
 }
 
