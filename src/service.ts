@@ -11,7 +11,8 @@ function delay(ms: number) {
 async function pgRestoreSchema(stackError: string[]) {
     const schemaPath = path.resolve(config.preDataPath);
 
-    await generateSchemaFile();
+    const commandTotal = await generateSchemaFile();
+    let processedLines = 0;
     await delay(2000);
     console.clear();
 
@@ -28,13 +29,16 @@ async function pgRestoreSchema(stackError: string[]) {
         });
 
         restoreProcess.stderr.on('data', (data) => {
-            console.error(`stderr: ${data}`);
-            const message = data.toString();
+            processedLines++;
+            const progressPercentage = ((processedLines / commandTotal) * 100).toFixed(2);
 
-            if(message.includes('pg_restore: error') || message.includes('pg_restore: warning'))
-                stackError.push(message);
+            const message = data.toString().replace(/[\r\n]+/g, '').trim();
+            console.warn(`stderr: ${message} | ${progressPercentage}%`);
+
+            if (message.includes('pg_restore: error') || message.includes('pg_restore: warning'))
+                stackError.push(data.toString());
             if (message.includes('pg_restore: error') && !message.includes('could not execute query')) {
-                reject(new Error(message));
+                reject(new Error(data.toString()));
                 restoreProcess.kill();
             }
         });
@@ -56,7 +60,8 @@ async function pgRestoreData(stackError: string[]): Promise<void> {
     const dataPath = path.resolve(config.dataPath);
     const postPath = path.resolve(config.postPath);
 
-    await filterPgRestoreFile();
+    const commandTotal = await filterPgRestoreFile();
+    let processedLines = 0;
     await delay(3000);
     console.clear();
 
@@ -74,13 +79,16 @@ async function pgRestoreData(stackError: string[]): Promise<void> {
             });
 
             restoreProcess.stderr.on('data', (data) => {
-                console.error(`stderr: ${data}`);
-                const message = data.toString();
+                processedLines++;
+                const progressPercentage = ((processedLines / commandTotal) * 100).toFixed(2);
 
-                if(message.includes('pg_restore: error') || message.includes('pg_restore: warning'))
-                    stackError.push(message);
+                const message = data.toString().replace(/[\r\n]+/g, '').trim();
+                console.warn(`stderr: ${message} | ${progressPercentage}%`);
+
+                if (message.includes('pg_restore: error') || message.includes('pg_restore: warning'))
+                    stackError.push(data.toString());
                 if (message.includes('pg_restore: error') && !message.includes('could not execute query')) {
-                    reject(new Error(message));
+                    reject(new Error(data.toString()));
                     restoreProcess.kill();
                 }
             });
@@ -99,10 +107,9 @@ async function pgRestoreData(stackError: string[]): Promise<void> {
         await delay(4000);
         console.clear();
 
-
         await new Promise<void>((resolve, reject) => {
             const command = 'pg_restore';
-            const args = ['-U', 'postgres', '-w', '-d', config.nomeBanco, '-L', postPath, '-v', config.backupFilePath];
+            const args = ['-U', 'postgres', '-w', '-d', config.nomeBanco, '-L', postPath, '--if-exists', '--clean', '-v', config.backupFilePath];
 
             const restoreProcess = spawn(command, args, {
                 env: { ...process.env, PGPASSWORD: 'postgres' }
@@ -113,15 +120,16 @@ async function pgRestoreData(stackError: string[]): Promise<void> {
             });
 
             restoreProcess.stderr.on('data', (data) => {
-                console.error(`stderr: ${data}`);
-                const message = data.toString();
+                const message = data.toString().replace(/[\r\n]+/g, '').trim();
 
-                if(message.includes('pg_restore: error') || message.includes('pg_restore: warning'))
-                    stackError.push(message);
-                if (message.includes('pg_restore: error') && !message.includes('could not execute query')) {
-                    reject(new Error(message));
-                    restoreProcess.kill();
-                }
+                if (message.include(" pg_restore: creating "))
+                    processedLines++;
+                const progressPercentage = ((processedLines / commandTotal) * 100).toFixed(2);
+
+                console.warn(`stderr: ${message} | ${progressPercentage}%`);
+
+                if (message.includes('pg_restore: error') || message.includes('pg_restore: warning'))
+                    stackError.push(data.toString());
             });
 
             restoreProcess.on('close', (code) => {
@@ -140,4 +148,5 @@ async function pgRestoreData(stackError: string[]): Promise<void> {
         throw error;
     }
 }
+
 export { pgRestoreData, pgRestoreSchema };

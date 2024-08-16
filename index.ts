@@ -1,3 +1,6 @@
+import fs from 'fs';
+import * as path from "path";
+
 import { pgRestoreData, pgRestoreSchema } from "./src/service";
 
 type ConfigProps = {
@@ -6,7 +9,8 @@ type ConfigProps = {
     dataPath: string;
     postPath: string;
     nomeBanco: string;
-    schemasList: string[];
+    schemasList: (string | RegExp)[];
+    removeFilter: (string | RegExp)[];
     codigoLoja: string | null;
     lojaList: string[];
 }
@@ -18,25 +22,37 @@ export const config: ConfigProps = {
     postPath: "./pgArchive/post_data.txt",
 
     nomeBanco: "compels_mr",
-    schemasList: ["cpdv", "crm", "dominio", "ecommerce", "kikker", "estoquekikker", "messaging", "otrs", "pci", "pcp", "rdstation", "rec", "transp", "tray", "vipcommerce"],
+    removeFilter: ["cpdv", "crm", "dominio", "ecommerce", "kikker", "estoquekikker", "messaging", "otrs",
+        "pci", "pcp", "rdstation", "rec", "transp", "tray", "vipcommerce", "estoquekikker",
+        new RegExp("old"), new RegExp("ruptura"), new RegExp("itemsaldoperiodo"), new RegExp("itemsaldopordia")],
+
+    schemasList: ["sca", "scc", "sei", "cpe", "ctb", "sat",
+        new RegExp(" itemnotaicms(_\\d+)? "), new RegExp(" notaicms(_\\d+)? ")],
     codigoLoja: "mr",
     lojaList: ["mr01", "mr02", "mr04", "mr06", "mr18"],
 }
 
 async function main() {
-    try {
-        const arrayError: string[] = [];
+    const arrayError: string[] = [];
 
+    try {
         await pgRestoreSchema(arrayError);
         await pgRestoreData(arrayError);
-
-        if (arrayError.length > 0) {
-            console.log("============================================================================ \n");
-            console.log("Erros do processo: \n");
-            arrayError.forEach(error => console.log(error + "\n"));
-        }
     } catch (error) {
         console.error("Deu ruim ai, verifica ai:", error);
+    }
+    if (arrayError.length > 0) {
+        const logPath = path.resolve("./pgArchive/logWarning.txt");
+        //const message = data.toString().replace(/[\r\n]+/g, '').trim();
+        const directory = path.dirname(logPath);
+        if (!fs.existsSync(directory)) {
+            fs.mkdirSync(directory, { recursive: true });
+        }
+
+        const file = fs.createWriteStream(logPath);
+        file.on('error', function (err) { });
+        arrayError.forEach(line => file.write(line.replace(/[\r\n]+/g, '').trim() + '\n'));
+        file.end();
     }
 }
 main();
