@@ -120,9 +120,8 @@ async function pgRestoreData(stackError: string[]): Promise<void> {
             });
 
             restoreProcess.stderr.on('data', (data) => {
-                const message = data.toString().replace(/[\r\n]+/g, '').trim();
-
-                if (message.include(" pg_restore: creating "))
+                const message: string = data.toString().replace(/[\r\n]+/g, '').trim();
+                if (message.includes(" pg_restore: creating "))
                     processedLines++;
                 const progressPercentage = ((processedLines / commandTotal) * 100).toFixed(2);
 
